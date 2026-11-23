@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="reader" style="padding:0; margin:10px; height:100%">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="Martin Heidegger's article Language">
+	<link rel="canonical" href="https://www.beyng.com/pages/en/PLT1971/Language.html" />
+	<title data-pagefind-meta="title">Language | Ereignis</title>
+	<meta property="og:url" content="https://www.beyng.com/pages/en/PLT1971/Language.html">
+	<meta property="og:type" content="article">
+	<meta property="og:title" content="Language">
+	<meta property="og:description" content="by Martin Heidegger">
+	<meta data-pagefind-default-meta="image[content]" property="og:image" content="https://www.beyng.com/hb/imgs/0060904305.jpg">
+	<link data-require="bootstrap-css@*" data-semver="3.3.1" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" />
+	<script data-require="angular.js@*" data-semver="1.3.15" src="https://code.angularjs.org/1.3.15/angular.js"></script>
+	<script data-require="ui-bootstrap@*" data-semver="0.12.1" src="https://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.12.1.min.js"></script>
+	<script src="Language.js"></script>
+</head>
+<body ng-controller="ReaderController" style="padding:0; margin:0; height:100%">
+	<table style="margin-bottom:1em;">
+		<tr>
+			<td>
+				<h1 data-pagefind-weight="8">Language</h1>
+				From
+				<i>Unterwegs zur Sprache</i> (1950-59) (<a href="https://www.beyng.com/hb/gesamt.html#12">GA 12</a>). Translated by Albert Hofstadter, 1971.<br />
+				Other editions have different pagination.
+			</td>
+			<td><img src="../../../hb/imgs/0060904305.jpg" alt="book cover"/></td>
+		</tr>
+	</table>
+	<div><input type="text" ng-model="goToPage" ng-change="goTo()" placeholder="Go to page number" /></div>
+	<pagination ng-model="currentPage"
+				total-items="lastPage"
+				max-size=1
+				items-per-page=1
+				boundary-links="true">
+	</pagination>
+	<table style="border:0; padding:0; margin:0; height:100%; width:100%">
+		<tr style="border:0; padding:0; margin:0">
+			<td style="border:0; padding:0; margin:0; height:100%">
+				<iframe ng-src="{{pageUrl}}" style="border-style: none;width: 100%; height: 100%"></iframe>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>
