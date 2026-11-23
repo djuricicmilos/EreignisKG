@@ -39,17 +39,19 @@ SEED = "https://www.beyng.com/"
 USER_AGENT = "EreignisKG-student-project/0.1 (univerzitetski projekat; kontakt: djuricicmilos6@gmail.com)"
 DEFAULT_DELAY = 1.5           # sekundi između zahteva (robots.txt Crawl-delay ima prednost ako je veći)
 TIMEOUT = 30
+MAX_PDF_BYTES = 100 * 1024 * 1024   # najveći dozvoljeni PDF
 MAX_BYTES = 5 * 1024 * 1024   # veće odgovore ne čuvamo
 MAX_TRIES = 3
 
-# Ove ekstenzije se beleže u bazi, ali se ne preuzimaju (npr. PDF-ovi radova).
+# Ove ekstenzije se beleže u bazi, ali se ne preuzimaju (PDF se preuzima).
 SKIP_EXT = {
-    ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".svg", ".ico", ".bmp", ".webp",
+    ".jpg", ".jpeg", ".png", ".gif", ".svg", ".ico", ".bmp", ".webp",
     ".zip", ".gz", ".tar", ".mp3", ".mp4", ".wav", ".doc", ".docx", ".xls",
     ".xlsx", ".ppt", ".pptx", ".epub", ".mobi", ".css", ".js", ".woff", ".woff2",
 }
 HTML_TYPES = {"text/html", "application/xhtml+xml", ""}   # prazan Content-Type tretiramo kao HTML
-STORE_TYPES = HTML_TYPES | {"text/plain"}
+PDF_TYPES = {"application/pdf", "application/x-pdf"}
+STORE_TYPES = HTML_TYPES | {"text/plain"} | PDF_TYPES
 
 try:
     import lxml  # noqa: F401
@@ -134,7 +136,8 @@ class Crawler:
         """URL -> relativna putanja fajla u data/raw/."""
         if self.workers > 1:
             digest = sha256(url.encode("utf-8")).hexdigest()
-            return Path(digest[:2]) / (digest + ".html")
+            ext = ".pdf" if urlparse(url).path.lower().endswith(".pdf") else ".html"
+            return Path(digest[:2]) / (digest + ext)
         p = urlparse(url)
         parts = [s for s in unquote(p.path).split("/") if s not in ("", ".", "..")]
         if p.path.endswith("/") or not parts:
@@ -272,15 +275,22 @@ class Crawler:
                 return True
 
             ctype = r.headers.get("Content-Type", "").split(";")[0].strip().lower()
+            is_pdf = ctype in PDF_TYPES or (
+                ctype == "application/octet-stream" and urlparse(url).path.lower().endswith(".pdf")
+            )
+            if is_pdf:
+                ctype = "application/pdf"
             if ctype not in STORE_TYPES:
                 self.update(url, status="skipped_type", http_status=code, content_type=ctype)
                 return True
 
+            max_bytes = MAX_PDF_BYTES if is_pdf else MAX_BYTES
             chunks, size = [], 0
             for chunk in r.iter_content(65536):
                 size += len(chunk)
-                if size > MAX_BYTES:
-                    self.update(url, status="failed", http_status=code, error="odgovor veći od MAX_BYTES")
+                if size > max_bytes:
+                    self.update(url, status="failed", http_status=code,
+                                error=f"odgovor veći od {max_bytes // (1024 * 1024)} MB")
                     return True
                 chunks.append(chunk)
             body = b"".join(chunks)
