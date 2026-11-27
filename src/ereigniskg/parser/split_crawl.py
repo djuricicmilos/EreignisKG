@@ -3,7 +3,7 @@ import argparse
 import sqlite3
 from collections import Counter
 from pathlib import Path
-from src.ereigniskg.crawler import SCHEMA, owner
+from ereigniskg.parser.crawler import SCHEMA, owner
 
 
 def split(source, root, workers):

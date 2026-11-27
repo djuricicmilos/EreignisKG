@@ -3,7 +3,7 @@ import argparse
 import shutil
 import sqlite3
 from pathlib import Path
-from src.ereigniskg.crawler import SCHEMA, owner
+from ereigniskg.parser.crawler import SCHEMA, owner
 
 
 def merge(root, output, workers):
